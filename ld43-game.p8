@@ -60,9 +60,6 @@ function gen_terrain(seed)
 		for j=0,7 do
 			ph+=d
 			terrainh[i*8+j]=ph
-			if d==1 then
-				
-			end
 		end
 		--line(i*8,h-d,i*8+8,h,7)
  end
@@ -121,7 +118,9 @@ function _update()
 		f=false
 		--y+=terrain[max(min(flr(x/8+1.5),16),1)]
 	end
-	y=terrainh[flr(x+15)]+16
+	local y1=terrainh[flr(x+15)]+16
+	local y2=terrainh[flr(x+8)]+16
+	y=min(y1,y2)
 end
 
 function _draw()
