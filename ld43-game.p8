@@ -6,6 +6,7 @@ local y=64
 local f=false --if player is flipped
 local terrain={}
 local terrainflowers={}
+local terrainflowersfg={}
 local terrainh={}
 local seed=69
 local camx=0
@@ -30,6 +31,7 @@ function updatemap()
 			h-=8
 		end
 		mset(i-1-cx,h/8-1,terrainflowers[i])
+		mset(i-1-cx,h/8-1+19,terrainflowersfg[i])
 		if terrainflowers[i]==52 then
 			if pd==0 and d==0 and nd==0 and terrainflowers[i-1]!=52 and terrainflowers[i-2]!=52 then
 				terrainflowers[i]=52
@@ -45,8 +47,22 @@ function updatemap()
 			end
 		end
 		mset(i-1-cx,h/8,n)
-		for y=h/8+1,31 do
+		for y=h/8+1,15 do
 			mset(i-1,y,4)
+		end
+		if terrainflowersfg[i]==52 then
+			if pd==0 and d==0 and nd==0 and terrainflowersfg[i-1]!=52 and terrainflowersfg[i-2]!=52 then
+				terrainflowersfg[i]=52
+				mset(i-1-cx,h/8-2+19,36)
+ 			mset(i-1-cx,h/8-3+19,20)
+ 			mset(i-2-cx,h/8-2+19,35)
+ 			mset(i-2-cx,h/8-3+19,19)
+ 			mset(i-cx,h/8-2+19,37)
+ 			mset(i-cx,h/8-3+19,21)
+			else
+				terrainflowersfg[i]=6
+				mset(i-1-cx,h/8-1+19,6)
+			end
 		end
 		if n==2 then
 			mset(i-1-cx,h/8+1,16)
@@ -100,6 +116,7 @@ function gen_terrain(seed)
 			terrainh[i*8+j]=ph
 		end
 		if d==0 then
+			--background plants
 			local fr=flr(rnd(80))
 			if fr<15 then
 				--mset(i-1,h/8-1,3)
@@ -111,6 +128,20 @@ function gen_terrain(seed)
 			else
 				--mset(i-1,h/8-1,6)
 				terrainflowers[i]=6
+			end
+			
+			--foreground plants
+			fr=flr(rnd(80))
+			if fr<15 then
+				--mset(i-1,h/8-1,3)
+				terrainflowersfg[i]=3
+			elseif fr<20 then
+				terrainflowersfg[i]=18
+			elseif fr<50 then
+				terrainflowersfg[i]=52
+			else
+				--mset(i-1,h/8-1,6)
+				terrainflowersfg[i]=6
 			end
 		end
 		--line(i*8,h-d,i*8+8,h,7)
@@ -144,14 +175,15 @@ end
 function _draw()
 	cls()
 	palt(0,false)
-	--updatemap()
- map(0+flr(camx/8),0+flr(camy/8),0-((camx/8)%1)*8,24-((camy/8)%1)*8,17,16)
-	--map(0,0,0-((camx/8)%1)*8,24,17,16)
-	--sspr(40,0,16,16,x,y,16,16,f,false)
+	palt(15,false)
+ map(flr(camx/8),0,0-((camx/8)%1)*8,24-camy,17,15)
 	sspr(56,0,8,8,x-camx,y-camy,8,8,f,false)
+	palt(0,true)
+	palt(15,true)
+	map(flr(camx/8),16,0-((camx/8)%1)*8,-camy,17,15)
 	print("!===debug===!",0,0,1)
 	print("mem: "..tostr(flr(stat(0)+0.5)-0.5).." kb",0,6,1)
-	print("cpu: "..tostr(flr(stat(1)*1000)/1000).." %",0,12,1)
+	print("cpu: "..tostr(flr(stat(1)*1000)/10).." %",0,12,1)
 	--print("blk: "..tostr(mget(flr(x/8),flr(y/8)+1)),0,18,1)
 end
 __gfx__
