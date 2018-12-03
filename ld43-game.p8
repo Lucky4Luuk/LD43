@@ -13,6 +13,7 @@ local camx=0
 local camy=0
 local state="game_load"
 local substate="load"
+local campfire_dialog=0
 local animdata={sword_test={frame=0,speed=8},player={frame=0,speed=8,state="idle"},campfire={frame=8,speed=3}}
 local player_speed=0.75
 local frame=0
@@ -21,6 +22,10 @@ local cloudspeed=0.2
 local objects={}
 local debug=false
 local party={}
+local hp=3
+local textcol=2
+local butcol=13
+local ibutcol=9
 
 function updatemap()
 	h=48
@@ -198,6 +203,10 @@ function swapnightpal()
 	--pal(3,13)
 end
 
+function swapdaypal()
+	pal()
+end
+
 function addobject(name,x,y)
 	objects[#objects+1]={name=name,x=x,y=y}
 	if name=="campfire" then
@@ -214,12 +223,9 @@ function addobject(name,x,y)
 		elseif r<8 then
 			char="priest"
 		end
+		objects[#objects].char=char
 		addobject(char,x+16,y)
 	end
-end
-
-function swapdaypal()
-	pal()
 end
 
 function _update()
@@ -228,9 +234,12 @@ function _update()
 		animdata.sword_test.frame+=flr(1/animdata.sword_test.speed)%4
 	elseif state=="story_0" then
 		updatestory_0()
+	elseif state=="dialog" then
+		updatedialog()
 	elseif state=="game_load" then
 		gen_terrain(seed)
-		state="game"
+		state="story_0"
+		substate="text0"
 	elseif state=="game" then
 		animdata.player.state="idle"
  	if btn(0) then
@@ -254,6 +263,7 @@ function _update()
  	y=min(y1,y2)
  	camx=max(0,x-64)
  	camy=min(0,y-52)
+ 	
  	for i=1,#clouds do
  		clouds[i].x-=cloudspeed
  		if clouds[i].x<-40 then
@@ -278,6 +288,8 @@ function _draw()
 		spr(164+f,32,32)
 	elseif state=="story_0" then
 		drawstory_0()
+	elseif state=="dialog" then
+		drawdialog()
 	elseif state=="game" then
  	cls()
  	--swapnightpal()
@@ -294,6 +306,15 @@ function _draw()
  		if objects[i].name=="campfire" then
  			local pf=flr(animdata.campfire.frame)*16
  			sspr(pf,48,16,16,objects[i].x-camx,objects[i].y-camy,16,16)
+ 			if abs(x-objects[i].x)<24 then
+ 				print("❎talk",x-camx,y-camy-10,ibutcol)
+ 				if frame>10 and btn(❎) then
+ 					state="dialog"
+ 					campfire_dialog=i
+ 					substate=objects[i].name.."_"..objects[i].char
+ 					frame=0
+ 				end
+ 			end
  		elseif objects[i].name=="default" then
  			spr(173,objects[i].x-camx,objects[i].y-camy,1,2,true,false)
  		elseif objects[i].name=="bard" then
@@ -317,19 +338,19 @@ function _draw()
  	palt(0,true)
  	palt(12,true)
  	map(flr(camx/8),16,0-((camx/8)%1)*8,-camy,17,15)
+ 	draw_party_hud()
 	end
 	if debug then
 		print("!===debug===!",0,0,1)
 		print("mem: "..tostr(flr(stat(0)+0.5)-0.5).." kb",0,6,1)
  	print("cpu: "..tostr(flr(stat(1)*1000)/10).." %",0,12,1)
 		print("frm: "..tostr(frame),0,18,1)
+		print("sta: "..state,0,24,1)
+		print("sst: "..substate,0,30,1)
 		--print("blk: "..tostr(mget(flr(x/8),flr(y/8)+1)),0,18,1)
 	end
 end
 -->8
-local textcol=2
-local butcol=13
-
 function loadstory_0()
 	gen_terrain()
 	substate="text0"
@@ -337,9 +358,9 @@ function loadstory_0()
 end
 
 function updatestory_0()
-	if substate=="load" then
-		loadstory_0()
-	elseif substate=="text0" then
+	--if substate=="load" then
+	--	loadstory_0()
+	if substate=="text0" then
 		if frame>10 then
 			if btn(❎) then
 				frame=0
@@ -359,21 +380,23 @@ function updatestory_0()
 	end
 end
 
-function drawtxtbg()
+function drawtxtbg(x,y,w,h)
 	palt(14,true)
-	spr(192,16,16)
-	spr(194,112,16)
-	spr(224,16,112)
-	spr(226,112,112)
-	for i=1,11 do
-		spr(193,16+i*8,16)
-		spr(225,16+i*8,112)
-		spr(208,16,16+i*8)
-		spr(210,112,16+i*8)
+	spr(192,x,y)
+	spr(194,x+w*8+8,y)
+	spr(224,x,y+h*8+8)
+	spr(226,x+w*8+8,y+h*8+8)
+	for i=1,(w or 11) do
+		spr(193,x+i*8,y)
+		spr(225,x+i*8,y+h*8+8)
 	end
-	for i=1,11 do
-		for j=1,11 do
-			spr(209,16+i*8,16+j*8)
+	for i=1,(h or 11) do
+		spr(208,x,y+i*8)
+		spr(210,x+w*8+8,y+i*8)
+	end
+	for i=1,(w or 11) do
+		for j=1,(h or 11) do
+			spr(209,x+i*8,y+j*8)
 		end
 	end
 	palt(14,false)
@@ -381,32 +404,105 @@ end
 
 function drawstory_0()
 	cls()
+	pal()
+	rectfill(0,0,128,128,12)
+	palt(0,false)
+	palt(12,true)
 	map(0,0,0,24,17,15)
+	palt(0,true)
+	palt(12,true)
+	map(flr(camx/8),16,0-((camx/8)%1)*8,-camy,17,15)
 	if substate=="text0" then
 		pal()
-		drawtxtbg()
-		print("once upon a time...",22,21,textcol)
-		print("a lone wanderer was",22,29,textcol)
-		print("exploring the vast",22,37,textcol)
-		print("lands of his home",22,45,textcol)
-		print("country. he was looking",22,53,textcol)
-		print("for something... or",22,61,textcol)
-		print("rather, someone.",22,69,textcol)
-		print("see, his home country",22,77,textcol)
-		print("had been attacked.",22,85,textcol)
-		print('"that damn vorgon", he',22,93,textcol)
-		print("thought, staring at",22,101,textcol)
-		print("the smoldering",22,109,textcol)
-		print("❎ ->",96,111,butcol)
+		drawtxtbg(8,8,11,11)
+		print("once upon a time...",14,21-8,textcol)
+		print("a lone wanderer was",14,29-8,textcol)
+		print("exploring the vast",14,37-8,textcol)
+		print("lands of his home",14,45-8,textcol)
+		print("country. he was looking",14,53-8,textcol)
+		print("for something... or",14,61-8,textcol)
+		print("rather, someone.",14,69-8,textcol)
+		print("see, his home country",14,77-8,textcol)
+		print("had been attacked.",14,85-8,textcol)
+		print('"that damn vorgon", he',14,93-8,textcol)
+		print("thought, staring at",14,101-8,textcol)
+		print("the smoldering",14,109-8,textcol)
+		print("❎ ->",88,111-8,butcol)
 	elseif substate=="text1" then
 		pal()
-		drawtxtbg()
-		print("remains of his once",22,21,textcol)
-		print("beautiful and calm",22,29,textcol)
-		print("village.",22,37,textcol)
-		print("suddenly,he was awoken",22,53,textcol)
-		print("from his thoughts by a",22,61,textcol)
-		print("loud bang.",22,69,textcol)
+		drawtxtbg(8,8,11,11)
+		print("remains of his once",14,21-8,textcol)
+		print("beautiful and calm",14,29-8,textcol)
+		print("village.",14,37-8,textcol)
+		print("suddenly,he was awoken",14,53-8,textcol)
+		print("from his thoughts by a",14,61-8,textcol)
+		print("loud bang.",14,69-8,textcol)
+		print("❎ ->",88,111-8,butcol)
+	end
+end
+
+function updatedialog()
+	if frame>10 then
+		if btn(🅾️) then
+ 		state="game"
+ 		frame=0
+		elseif btn(❎) then
+			if substate=="campfire_priest" then
+				substate="campfire_priest_join"
+			end
+		end
+	end
+	
+	if substate=="campfire_" then
+		state="game"
+	end
+end
+
+function draw_party_hud()
+	print("party:",4,2,5)
+	for i=1,#party do
+		if party[i].sort=="knight" then
+			sspr(112,64, 8,12, i*10,4, 8,12)
+		elseif party[i].sort=="priest" then
+			sspr(96,80, 8,12, i*10,4, 8,12)
+		end
+	end
+end
+
+function partyadd(sort)
+	if #party<4 then
+		party[#party+1]={sort=sort,hp=1,attack=0}
+	else
+		--fuck off
+	end
+end
+
+function drawdialog()
+	cls()
+	pal()
+	palt(0,false)
+	palt(12,true)
+	rectfill(0,0,128,128,12)
+	map(0,0,0,24,17,15)
+	palt(0,true)
+	palt(12,true)
+	map(flr(camx/8),16,0-((camx/8)%1)*8,-camy,17,15)
+	drawtxtbg(8,10,11,9)
+	if substate=="campfire_priest" then
+		print([[welcome, lone
+traveler. what brings
+you to these forsaken
+lands?
+
+																-priest]],14,17,textcol)
+print([[❎i need your help
+🅾️leave]],14,17+6*8,butcol)
+	elseif substate=="campfire_priest_join" then
+		--quick and dirty hack to add him to your party
+		partyadd("priest")
+		objects[campfire_dialog].char=""
+		campfire_dialog=0
+		state="game"
 	end
 end
 __gfx__
