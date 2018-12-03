@@ -224,6 +224,7 @@ function addobject(name,x,y)
 			char="priest"
 		end
 		objects[#objects].char=char
+		objects[#objects].char_id=#objects+1
 		addobject(char,x+16,y)
 	end
 end
@@ -303,30 +304,32 @@ function _draw()
  	--sspr(56,0,8,8,x-camx,y-camy,8,8,f,false)
  	palt(14,true)
  	for i=1,#objects do
- 		if objects[i].name=="campfire" then
- 			local pf=flr(animdata.campfire.frame)*16
- 			sspr(pf,48,16,16,objects[i].x-camx,objects[i].y-camy,16,16)
- 			if abs(x-objects[i].x)<24 then
- 				print("❎talk",x-camx,y-camy-10,ibutcol)
- 				if frame>10 and btn(❎) then
- 					state="dialog"
- 					campfire_dialog=i
- 					substate=objects[i].name.."_"..objects[i].char
- 					frame=0
- 				end
- 			end
- 		elseif objects[i].name=="default" then
- 			spr(173,objects[i].x-camx,objects[i].y-camy,1,2,true,false)
- 		elseif objects[i].name=="bard" then
- 			spr(143,objects[i].x-camx,objects[i].y-camy,1,2,true,false)
- 		elseif objects[i].name=="knight" then
- 			spr(142,objects[i].x-camx,objects[i].y-camy,1,2,true,false)
- 		elseif objects[i].name=="priest" then
- 			spr(172,objects[i].x-camx,objects[i].y-camy,1,2,true,false)
- 		elseif objects[i].name=="lumberjack" then
- 			spr(174,objects[i].x-camx,objects[i].y-camy,1,2,true,false)
- 		elseif objects[i].name=="archer" then
- 			spr(175,objects[i].x-camx,objects[i].y-camy,1,2,true,false)
+ 		if objects[i] then
+  		if objects[i].name=="campfire" then
+  			local pf=flr(animdata.campfire.frame)*16
+  			sspr(pf,48,16,16,objects[i].x-camx,objects[i].y-camy,16,16)
+  			if abs(x-objects[i].x)<24 then
+  				print("❎talk",x-camx,y-camy-10,ibutcol)
+  				if frame>10 and btn(❎) then
+  					state="dialog"
+  					campfire_dialog=i
+  					substate=objects[i].name.."_"..objects[i].char
+  					frame=0
+  				end
+  			end
+  		elseif objects[i].name=="default" then
+  			spr(173,objects[i].x-camx,objects[i].y-camy,1,2,true,false)
+  		elseif objects[i].name=="bard" then
+  			spr(143,objects[i].x-camx,objects[i].y-camy,1,2,true,false)
+  		elseif objects[i].name=="knight" then
+  			spr(142,objects[i].x-camx,objects[i].y-camy,1,2,true,false)
+  		elseif objects[i].name=="priest" then
+  			spr(172,objects[i].x-camx,objects[i].y-camy,1,2,true,false)
+  		elseif objects[i].name=="lumberjack" then
+  			spr(174,objects[i].x-camx,objects[i].y-camy,1,2,true,false)
+  		elseif objects[i].name=="archer" then
+  			spr(175,objects[i].x-camx,objects[i].y-camy,1,2,true,false)
+  		end
  		end
  	end
  	if animdata.player.state=="move" then
@@ -497,10 +500,12 @@ lands?
 																-priest]],14,17,textcol)
 print([[❎i need your help
 🅾️leave]],14,17+6*8,butcol)
-	elseif substate=="campfire_priest_join" then
+	elseif substate=="campfire_priest_join" and objects[campfire_dialog] then
 		--quick and dirty hack to add him to your party
 		partyadd("priest")
 		objects[campfire_dialog].char=""
+		objects[objects[campfire_dialog].char_id]=nil
+		objects[campfire_dialog].char_id=0
 		campfire_dialog=0
 		state="game"
 	end
