@@ -295,9 +295,11 @@ function _draw()
  	cls()
  	--swapnightpal()
  	rectfill(0,0,128,128,12)
+ 	palt(12,true)
  	for i=1,#clouds do
  		drawcloud(clouds[i].x,clouds[i].y)
  	end
+ 	palt(12,false)
  	palt(0,false)
  	palt(12,true)
   map(flr(camx/8),0,0-((camx/8)%1)*8,24-camy,17,15)
@@ -452,6 +454,16 @@ function updatedialog()
 		elseif btn(❎) then
 			if substate=="campfire_priest" then
 				substate="campfire_priest_join"
+			elseif substate=="campfire_knight" then
+				substate="campfire_knight_join"
+			elseif substate=="campfire_bard" then
+				substate="campfire_bard_join"
+			elseif substate=="campfire_archer" then
+				substate="campfire_archer_join"
+			elseif substate=="campfire_lumberjack" then
+				substate="campfire_lumberjack_join"
+			elseif substate=="campfire_default" then
+				substate="campfire_default_join"
 			end
 		end
 	end
@@ -462,21 +474,44 @@ function updatedialog()
 end
 
 function draw_party_hud()
+	pal()
+	palt(14,true)
+	for i=0,6 do
+		spr(145,i*8,0)
+		spr(145,i*8,8)
+		spr(178-i%2,i*8,16)
+	end
+	spr(147,56,0)
+	spr(163,56,8)
+	spr(179,56,16)
 	print("party:",4,2,5)
+	pal()
+	pal(14,13)
 	for i=1,#party do
+		local xp=4+(i-1)*10
 		if party[i].sort=="knight" then
-			sspr(112,64, 8,12, i*10,4, 8,12)
+			sspr(112,67, 8,9, xp,8, 8,9)
+		elseif party[i].sort=="bard" then
+			sspr(120,67, 8,9, xp,8, 8,9)
 		elseif party[i].sort=="priest" then
-			sspr(96,80, 8,12, i*10,4, 8,12)
+			sspr(96,83, 8,9, xp,8, 8,9)
+		elseif party[i].sort=="lumberjack" then
+			sspr(112,83, 8,9, xp,8, 8,9)
+		elseif party[i].sort=="archer" then
+			sspr(120,83, 8,9, xp,8, 8,9)
+		elseif party[i].sort=="default" then
+			sspr(104,83, 8,9, xp,8, 8,9)
 		end
 	end
+	pal()
 end
 
 function partyadd(sort)
 	if #party<4 then
 		party[#party+1]={sort=sort,hp=1,attack=0}
 	else
-		--fuck off
+		substate="campfire_party_replace_"..sort
+		frame=0
 	end
 end
 
@@ -500,9 +535,85 @@ lands?
 																-priest]],14,17,textcol)
 print([[❎i need your help
 🅾️leave]],14,17+6*8,butcol)
+	elseif substate=="campfire_knight" then
+		print([[welcome, lone
+traveler. what brings
+you to these forsaken
+lands?
+
+																-knight]],14,17,textcol)
+print([[❎i need your help
+🅾️leave]],14,17+6*8,butcol)
+	elseif substate=="campfire_lumberjack" then
+		print([[welcome, lone
+traveler. what brings
+you to these forsaken
+lands?
+
+													-lumberjack]],14,17,textcol)
+print([[❎i need your help
+🅾️leave]],14,17+6*8,butcol)
+	elseif substate=="campfire_archer" then
+		print([[welcome, lone
+traveler. what brings
+you to these forsaken
+lands?
+
+																-archer]],14,17,textcol)
+print([[❎i need your help
+🅾️leave]],14,17+6*8,butcol)
+	elseif substate=="campfire_bard" then
+		print([[welcome, lone
+traveler. what brings
+you to these forsaken
+lands?
+
+																  -bard]],14,17,textcol)
+print([[❎i need your help
+🅾️leave]],14,17+6*8,butcol)
 	elseif substate=="campfire_priest_join" and objects[campfire_dialog] then
 		--quick and dirty hack to add him to your party
 		partyadd("priest")
+		objects[campfire_dialog].char=""
+		objects[objects[campfire_dialog].char_id]=nil
+		objects[campfire_dialog].char_id=0
+		campfire_dialog=0
+		state="game"
+	elseif substate=="campfire_knight_join" and objects[campfire_dialog] then
+		--quick and dirty hack to add him to your party
+		partyadd("knight")
+		objects[campfire_dialog].char=""
+		objects[objects[campfire_dialog].char_id]=nil
+		objects[campfire_dialog].char_id=0
+		campfire_dialog=0
+		state="game"
+	elseif substate=="campfire_archer_join" and objects[campfire_dialog] then
+		--quick and dirty hack to add him to your party
+		partyadd("archer")
+		objects[campfire_dialog].char=""
+		objects[objects[campfire_dialog].char_id]=nil
+		objects[campfire_dialog].char_id=0
+		campfire_dialog=0
+		state="game"
+	elseif substate=="campfire_lumberjack_join" and objects[campfire_dialog] then
+		--quick and dirty hack to add him to your party
+		partyadd("lumberjack")
+		objects[campfire_dialog].char=""
+		objects[objects[campfire_dialog].char_id]=nil
+		objects[campfire_dialog].char_id=0
+		campfire_dialog=0
+		state="game"
+	elseif substate=="campfire_bard_join" and objects[campfire_dialog] then
+		--quick and dirty hack to add him to your party
+		partyadd("bard")
+		objects[campfire_dialog].char=""
+		objects[objects[campfire_dialog].char_id]=nil
+		objects[campfire_dialog].char_id=0
+		campfire_dialog=0
+		state="game"
+	elseif substate=="campfire_default_join" and objects[campfire_dialog] then
+		--quick and dirty hack to add him to your party
+		partyadd("default")
 		objects[campfire_dialog].char=""
 		objects[objects[campfire_dialog].char_id]=nil
 		objects[campfire_dialog].char_id=0
@@ -575,38 +686,38 @@ ee84a4494254a84eee84a44a4254a84eee84944a4254a94eee84944a4254a94eee84a44a4254a94e
 ee45a4524424494eee45a4524424494eee45a4524424494eee45a4524424494eee45a45244244a4eee45a4524424494eee45a4524424494eee45a4524424494e
 e452442245254424e452442245254424e452442245254424e452442245254424e452442245254424e452442245254424e452442245254424e452442245254424
 42245224522254224224522452225422422452245222542242245224522254224224522452225422422452245222542242245224522254224224522452225422
-00000000000000000000000000000000eeeeeee444eeeeeeeeeeeee444eeeeeeeeeeeeee444eeeeeeeeeeee444eeeeeeeeeeeeee444eeeeeeeeeeeeeeeeeeeee
-00220022002200222200220022002200eeeeeee44feeeeeeeeeeeee44feeeeeeeeeeeeee44feeeeeeeeeeee44feeeeeeeeeeeeee44feeeeeeeeeeeeeeeeeeeee
-02ff22ff22ff22ffff22ff22ff22ff20eeeeee44ffeeeeeeeeeeee44ffeeeeeeeeeeeee44ffeeeeeeeeeee44ffeeeeeeeeeeeee44ffeeeeeeeeeeeeeeeeeeeee
-02ffffffffffffffffffffffffffff20eeeeee3313eee4eeeeeeee3313eee4eeeeeeeee3313eeee4eeeeee3313eee4eeeeeeeee3313eeee4eeeeeeeeeeeeeeee
-002ffffffffffffffffffffffffff200eeeee3311eee45eeeeeee3311eee45eeeeeeee3311eeee45eeeee3311eee45eeeeeeee3311eeee45eeeeeeeeeeeeeeee
-002ffffffffffffffffffffffffff200eeeee3ddf1f4544eeeeee3ddf1f4544eeeeee3ddf1fee45eeeeee3ddf1f4544eeeeee3ddf1fee45eeee555eeeee444ee
-02ffffffffffffffffffffffffffff20eeee331115e4404eeeee331115e4404eeeee331115ee4444eeee331115e4404eeeee331115ee4444eee55feeeee44fee
-02ffffffffffffffffffffffffffff20ee33333dd6554444ee33333dd6554444ee33333dd6554404ee33333dd6554444ee33333dd6554404eee4ffeeee44ffee
-02ffffffffffffff02200110ffffff20e5493336d6445444e5493336d6445444e5493336d6445444e5493336d6445444e5493336d6445444ee2252eeee9959ee
-02ffffffffffffff27821881ffffff2054449366d6442e4454449366d6442e4454449366d644244454449366d6442e4454449366d6442444ee26d5eeee9655ee
-002fffffffffffff28888881fffff200544496464644eeee544496464644eeee544496464644ee44544496464644eeee544496464644ee44ee26d5eeee9656ee
-002fffffffffffff28888881fffff200554442224442eeee554442224442eeee55e442224442eeee554442222442eeee554442222444eeeeee26f5eeee96f5ee
-02ffffffffffffff02888810ffffff20e54422eee4e2eeee544e22eee4ee2eee554422eee4e2eeeee5e442eee4e2eeeee544e2eeeee44eeeee25d1eeee95d1ee
-02ffffffffffffff02888810ffffff20554e2eeee4e2eeee54ee2eeee4ee2eee5e4e2eeee4ee2eee55e24eeee4e2eeee55e4e2eeeee24eeeeeeddeeeeeeddeee
-002fffffffffffff00288100fffff200ee4e2eeee4e2eeeee4ee2eeee4e5eeeee54e2eeee4ee2eeeee2e4eee5ee2eeeeeee42eeeeee24eeeeeed1eeeeeed1eee
-002fffffffffffff00021000fffff200ee5e5eeee5e5eeeee5eee5eee5eeeeeeeeee5eeee5eee5eeee5ee5eeeee5eeeeeee5eeeeeee5e5eeeee665eeeee665ee
-02ffffff0220011000000066ffffff2000000066000000660000006600000066eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-02ffffff200210010000066dffffff200000066d0000066d0000066d0000066deeeeeeeeeeeeeeeeee1ee1e11e1ee1eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-002fffff20000001000066d0fffff200000066d0000066d0000066d8000066d8eeeeeeeeeeeeeeeee1f11f1ff1f11f1eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-002fffff2000000100566d00fffff20000566d0800566d0000566d0000566d08eeeeeeeeeeeeeeeeee1ffffffffff1eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-02ffffff020000100556d000ffffff200556d0080556d0080556d0000556d000eeeeeeeeeeeeeeeeee1ffffffffff1eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-02ffffff0200001000455000ffffff2000455000004550080045500800455000eeeeeeeeeeeeeeeee1ffffffffffff1eeee444eeeee444eeeee444eeeee444ee
-002fffff0020010004050000fffff20004050000040500000405000804050008eeeeeeeeeeeeeeeeee1ffffffffff1eeeee44feeeee44feeeee44feeeee44fee
-002fffff0002100000000000fffff20000000008000000000000000000000008eeeeeeeeeeeeeeeee1ffffffffffff1eee44ffeeee44ffeeee44ffeeee44ffee
-02ffffffffffffffffffffffffffff2001234567eee54eeeeee54eeeeeeeeeeeeeeeeeeeeeeeeeeee1ffffffffffff1eee6656e8eedd5deeeee858eeee3353ee
-02ffffffffffffffffffffffffffff2089abcdefeee6e4eeee6ee4eeeeeeeeeeeeeeeeeeeeeeeeeeee1ffffffffff1eeee6755e4eed655eeeee855eee44655ee
-002ffffffffffffffffffffffffff20000000000eee6e4eee6eeee4eeeeeeeeeeeeeeeeeeeeeeeeee1ffffffffffff1eee6755f4eed656eeeee858eeee3656ee
-002ffffffffffffffffffffffffff200012341d6eee6ee4e6eeeeee466eee65eeeeeeeeeeeeeeeeeee1ffffffffff1eeee6775e4eed6f5eeeee8f5eeee36f5ee
-02ffffffffffffffffffffffffffff2029931d4deee6ee4e6eeeeee4e4444555eeeeeeeeeeeeeeeeee1ffffffffff1eeee65d1e4eed5d1eeeee5d1eeee35d1ee
-02ff22ff22ff22ffff22ff22ff22ff2000000000eee6e4eee6eeee4e66eee65eeeeeeeeeeeeeeeeee1f11f1ff1f11f1eeeeddee4eeeddeeeeeeddeeeeeeddeee
-0022002200220022220022002200220000000000eee6e4eeee6ee4eeeeeeeeeeeeeeeeeeeeeeeeeeee1ee1e11e1ee1eeeeed1ee4eeed1eeeeeed1eeeeeed1eee
-0000000000000000000000000000000000000000eee54eeeeee54eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee665e4eee665eeeee665eeeee665ee
+eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee444eeeeeeeeeeeee444eeeeeeeeeeeeee444eeeeeeeeeeee444eeeeeeeeeeeeee444eeeeeeeeeeeeeeeeeeeee
+ee22ee22ee22ee2222ee22ee22ee22eeeeeeeee44feeeeeeeeeeeee44feeeeeeeeeeeeee44feeeeeeeeeeee44feeeeeeeeeeeeee44feeeeeeeeeeeeeeeeeeeee
+e2ff22ff22ff22ffff22ff22ff22ff2eeeeeee44ffeeeeeeeeeeee44ffeeeeeeeeeeeee44ffeeeeeeeeeee44ffeeeeeeeeeeeee44ffeeeeeeeeeeeeeeeeeeeee
+e2ffffffffffffffffffffffffffff2eeeeeee3313eee4eeeeeeee3313eee4eeeeeeeee3313eeee4eeeeee3313eee4eeeeeeeee3313eeee4eeeeeeeeeeeeeeee
+ee2ffffffffffffffffffffffffff2eeeeeee3311eee45eeeeeee3311eee45eeeeeeee3311eeee45eeeee3311eee45eeeeeeee3311eeee45eeeeeeeeeeeeeeee
+ee2ffffffffffffffffffffffffff2eeeeeee3ddf1f4544eeeeee3ddf1f4544eeeeee3ddf1fee45eeeeee3ddf1f4544eeeeee3ddf1fee45eeee555eeeee444ee
+e2ffffffffffffffffffffffffffff2eeeee331115e4404eeeee331115e4404eeeee331115ee4444eeee331115e4404eeeee331115ee4444eee55feeeee44fee
+e2ffffffffffffffffffffffffffff2eee33333dd6554444ee33333dd6554444ee33333dd6554404ee33333dd6554444ee33333dd6554404eee4ffeeee44ffee
+e2ffffffffffffff02200110ffffff2ee5493336d6445444e5493336d6445444e5493336d6445444e5493336d6445444e5493336d6445444ee2252eeee9959ee
+e2ffffffffffffff27821881ffffff2e54449366d6442e4454449366d6442e4454449366d644244454449366d6442e4454449366d6442444ee26d5eeee9655ee
+ee2fffffffffffff28888881fffff2ee544496464644eeee544496464644eeee544496464644ee44544496464644eeee544496464644ee44ee26d5eeee9656ee
+ee2fffffffffffff28888881fffff2ee554442224442eeee554442224442eeee55e442224442eeee554442222442eeee554442222444eeeeee26f5eeee96f5ee
+e2ffffffffffffff02888810ffffff2ee54422eee4e2eeee544e22eee4ee2eee554422eee4e2eeeee5e442eee4e2eeeee544e2eeeee44eeeee25d1eeee95d1ee
+e2ffffffffffffff02888810ffffff2e554e2eeee4e2eeee54ee2eeee4ee2eee5e4e2eeee4ee2eee55e24eeee4e2eeee55e4e2eeeee24eeeeeeddeeeeeeddeee
+ee2fffffffffffff00288100fffff2eeee4e2eeee4e2eeeee4ee2eeee4e5eeeee54e2eeee4ee2eeeee2e4eee5ee2eeeeeee42eeeeee24eeeeeed1eeeeeed1eee
+ee2fffffffffffff00021000fffff2eeee5e5eeee5e5eeeee5eee5eee5eeeeeeeeee5eeee5eee5eeee5ee5eeeee5eeeeeee5eeeeeee5e5eeeee665eeeee665ee
+e2ffffff0220011000000066ffffff2e00000066000000660000006600000066eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+e2ffffff200210010000066fffffff2e0000066d0000066d0000066d0000066deeeeeeeeeeeeeeeeee1ee1e11e1ee1eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+ee2fffff20000001000066d0fffff2ee000066d0000066d0000066d8000066d8eeeeeeeeeeeeeeeee1f11f1ff1f11f1eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+ee2fffff2000000100566d00fffff2ee00566d0800566d0000566d0000566d08eeeeeeeeeeeeeeeeee1ffffffffff1eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+e2ffffff020000100556d000ffffff2e0556d0080556d0080556d0000556d000eeeeeeeeeeeeeeeeee1ffffffffff1eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+e2ffffff0200001000455000ffffff2e00455000004550080045500800455000eeeeeeeeeeeeeeeee1ffffffffffff1eeee444eeeee444eeeee444eeeee444ee
+ee2fffff0020010004050000fffff2ee04050000040500000405000804050008eeeeeeeeeeeeeeeeee1ffffffffff1eeeee44feeeee44feeeee44feeeee44fee
+ee2fffff0002100000000000fffff2ee00000008000000000000000000000008eeeeeeeeeeeeeeeee1ffffffffffff1eee44ffeeee44ffeeee44ffeeee44ffee
+e2ffffffffffffffffffffffffffff2e01234567eee54eeeeee54eeeeeeeeeeeeeeeeeeeeeeeeeeee1ffffffffffff1eee6656e8eedd5deeeee858eeee3353ee
+e2ffffffffffffffffffffffffffff2e89abcdefeee6e4eeee6ee4eeeeeeeeeeeeeeeeeeeeeeeeeeee1ffffffffff1eeee6755e4eed655eeeee855eee44655ee
+ee2ffffffffffffffffffffffffff2ee00000000eee6e4eee6eeee4eeeeeeeeeeeeeeeeeeeeeeeeee1ffffffffffff1eee6755f4eed656eeeee858eeee3656ee
+ee2ffffffffffffffffffffffffff2ee012341d6eee6ee4e6eeeeee466eee65eeeeeeeeeeeeeeeeeee1ffffffffff1eeee6775e4eed6f5eeeee8f5eeee36f5ee
+e2ffffffffffffffffffffffffffff2e29931d4deee6ee4e6eeeeee4e4444555eeeeeeeeeeeeeeeeee1ffffffffff1eeee65d1e4eed5d1eeeee5d1eeee35d1ee
+e2ff22ff22ff22ffff22ff22ff22ff2e00000000eee6e4eee6eeee4e66eee65eeeeeeeeeeeeeeeeee1f11f1ff1f11f1eeeeddee4eeeddeeeeeeddeeeeeeddeee
+ee22ee22ee22ee2222ee22ee22ee22ee00000000eee6e4eeee6ee4eeeeeeeeeeeeeeeeeeeeeeeeeeee1ee1e11e1ee1eeeeed1ee4eeed1eeeeeed1eeeeeed1eee
+eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee00000000eee54eeeeee54eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee665e4eee665eeeee665eeeee665ee
 eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee404040404040404040404040404040404040404040404040404040404040404040404040
 ee1ee1e11e1ee1e11e1ee1eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee404040404040404040404040404040404040404040404040404040404040404040404040
 e1f11f1ff1f11f1ff1f11f1eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee404040404040404040404040404040404040404040404040404040404040404040404040
